@@ -15,10 +15,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
-#include<filesystem>
-#include"src/document.h"
-#include"src/windows/page_window.h"
-#include"src/windows/turn_page_bar_win.h"
+#include <filesystem>
+#include "src/document.h"
+#include "src/windows/page_window.h"
+#include "src/windows/turn_page_bar_win.h"
 
 #define KEY_ENTER_ 10
 
@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
     }
     Document doc(argv[1]);
 
-    TurnPageBarWindow turnPageBarWindow(x, y, doc.getPageCount());
-    PageWindow pageWin(y, x, 0, &doc);
+    TurnPageBarWindow turnPageBarWin(x, y, doc.getPageCount());
+    PageWindow pageWin(y, x, 0, doc.getText());
 
     string sp_buff;
     while(true) {
@@ -65,27 +65,43 @@ int main(int argc, char* argv[]) {
                 pageWin.scrollBack();
                 break;
             case KEY_LEFT:
-                turnPageBarWindow.turnBackPage(&doc, pageWin, x);
+                if (!doc.isPrevPageNull()) {
+                    doc.gotoPrevPage();
+                    pageWin.changeTextAndPrint(doc.getText());
+                    turnPageBarWin.decPageNumber();
+                    turnPageBarWin.printCurrentPageNumber();
+                }
                 break;
             case KEY_RIGHT:
-                turnPageBarWindow.turnPage(&doc, pageWin, x);
+                if (!doc.isNextPageNull()) {
+                    doc.gotoNextPage();
+                    pageWin.changeTextAndPrint(doc.getText());
+                    turnPageBarWin.incPageNumber();
+                    turnPageBarWin.printCurrentPageNumber();
+                }
                 break;
             case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
-                turnPageBarWindow.writePageNumber(c);
+                turnPageBarWin.writeDigit(c);
                 break;
             case KEY_BACKSPACE:
-                turnPageBarWindow.eraseOneDigitFromPageNumber();
+                turnPageBarWin.eraseOneDigit();
                 break;
             case KEY_ENTER_:
-                turnPageBarWindow.gotoPage(&doc, pageWin, x);
+                if (doc.getPageCount() >= turnPageBarWin.getPageNum()
+                && turnPageBarWin.getPageNum() != 0) {
+                    doc.gotoPage(turnPageBarWin.getPageNum()-1);
+                    pageWin.changeTextAndPrint(doc.getText());
+                    turnPageBarWin.updateCurrentPageNumber();
+                    turnPageBarWin.printCurrentPageNumber();
+                }
                 break;
             case KEY_RESIZE:
                 getmaxyx(stdscr, y, x);
                 checkSmallConsoleSize(y, x);
                 y -= 2; x -= 2;
                 clear(); refresh();
-                pageWin.resize(y, x, 0, &doc);
-                turnPageBarWindow.resize(y, x, doc.getPageCount());
+                pageWin.resize(y, x, 0, doc.getText());
+                turnPageBarWin.resize(y, x, doc.getPageCount());
                 break;
             default:
                 break;

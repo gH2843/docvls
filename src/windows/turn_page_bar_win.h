@@ -20,8 +20,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #pragma once
 
 #include <ncurses.h>
-#include "../document.h"
-#include "page_window.h"
 
 using namespace std;
 
@@ -35,6 +33,7 @@ class TurnPageBarWindow {
         mvwprintw(win, 1, 10, "%s", sp_buff.c_str());
         wrefresh(win);
     }
+public:
     void printCurrentPageNumber() {
         wmove(win, 1, 2);
         if (c_page < 10) {
@@ -42,7 +41,6 @@ class TurnPageBarWindow {
         } else { wprintw(win, "%d", c_page); }
         wrefresh(win);
     }
-public:
     TurnPageBarWindow(short x, short y, short pages_count) {
         this->win = newwin(3, x + 2, y - 1, 0);
         this->c_page = 1;
@@ -68,42 +66,30 @@ public:
         wrefresh(win);
     }
 
-    void turnBackPage(Document* doc, PageWindow& pageWin, short x) {
-        if (doc->page->prev != nullptr) {
-            doc->gotoPrevPage();
-            pageWin.changeTextAndPrint(doc, x);
-            --c_page;
-            printCurrentPageNumber();
-        }
+    void incPageNumber() {
+        ++c_page;
     }
-    void turnPage(Document* doc, PageWindow& pageWin, short x) {
-        if (doc->page->next != nullptr) {
-            doc->gotoNextPage();
-            pageWin.changeTextAndPrint(doc, x);
-            ++c_page;
-            printCurrentPageNumber();
-        }
+    void decPageNumber() {
+        --c_page;
     }
 
-    void writePageNumber(int c) {
+    void writeDigit(int c) {
         if (sp_buff.size() < 2) {
             sp_buff += (char) c;
             printSPBuffer();
         }
     }
-    void eraseOneDigitFromPageNumber() {
+    void eraseOneDigit() {
         if (!sp_buff.empty()) {
             sp_buff.pop_back();
             printSPBuffer();
         }
     }
-    void gotoPage(Document* doc, PageWindow& pageWin, short x) {
-        if (doc->getPageCount() >= stoi(sp_buff) && stoi(sp_buff) != 0) {
-            doc->gotoPage(stoi(sp_buff) - 1);
-            pageWin.changeTextAndPrint(doc, x);
-            c_page = stoi(sp_buff);
-            printCurrentPageNumber();
-        }
+    void updateCurrentPageNumber() {
+        c_page = static_cast<short>(stoi(sp_buff));
+    }
+    short getPageNum() {
+        return static_cast<short>(stoi(sp_buff));
     }
 };
 

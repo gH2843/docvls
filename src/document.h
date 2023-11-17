@@ -32,9 +32,8 @@ class Document {
         ++page_count;
     }
     DoublyLinkedList pages;
-public:
     Node* page = pages.head;
-
+public:
     explicit Document(const string& doc_path) {
         std::ifstream doc (doc_path);
         string line, raw_doc;
@@ -65,13 +64,21 @@ public:
         pages.clear();
     }
 
+    bool isPrevPageNull() {
+        return page->prev == nullptr;
+    }
+    bool isNextPageNull() {
+        return page->next == nullptr;
+    }
+
+
     [[nodiscard]] short getPageCount() const {
         return page_count;
     }
-    [[nodiscard]] string getText() const {
+    [[nodiscard]] const string& getText() const {
         return page->data.text;
     }
-    [[nodiscard]] string getName() const {
+    [[nodiscard]] const string& getName() const {
         return page->data.name;
     }
 

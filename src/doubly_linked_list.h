@@ -100,6 +100,7 @@ public:
             current = current->next;
             ++counter;
         }
+        return nullptr;
     }
 };
 

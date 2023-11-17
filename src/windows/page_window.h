@@ -21,7 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
 #include <string>
 #include "ncurses.h"
-#include "../document.h"
 #include "../soft_wrap.h"
 
 using namespace std;
@@ -47,25 +46,31 @@ class PageWindow {
 
         wclear(win);
         mvwprintw(win, 1, 1, "%s", current_text.c_str());
-        box(win, 0, 0);
+        box(win, 0, 0); //take out
         wrefresh(win);
     }
 public:
-    PageWindow(short y, short x, int pos, Document* doc) {
+    PageWindow(short y, short x, int pos, const string& text) {
         this->win = newwin(y - 1, x + 2, 0, 0);
         this->pos = pos;
-        this->whole_text = softWrap(doc->getText(), x);
+        this->whole_text = softWrap(text, x);
 
         printPage(win->_maxy + 1);
     }
-    void resize(short y, short x, int pos_, Document* doc) {
+    void resize(short y, short x, int pos_, const string& text) {
         win = newwin(y - 1, x + 2, 0, 0);
         this->pos = pos_;
-        this->whole_text = softWrap(doc->getText(), x);
+        this->whole_text = softWrap(text, x);
 
         printPage(win->_maxy + 1);
     }
+    void resize(short y, short x) {
+        win = newwin(y - 1, x + 2, 0, 0);
 
+        wclear(win);
+        box(win, 0, 0); // take out
+        wrefresh(win);
+    }
     void scrollUp() {
         if (pos > 0) {
             pos -= 3;
@@ -74,15 +79,14 @@ public:
             printPage(win->_maxy + 1);
         }
     }
-
     void scrollBack() { //todo: add protection against scroll so far
         for (; pos < whole_text.size() && whole_text[pos] != '\n'; ++pos) { }
         pos += 2;
         printPage(win->_maxy + 1);
     }
 
-    void changeTextAndPrint(Document* doc, short  x) {
-        whole_text = softWrap(doc->getText(), x);
+    void changeTextAndPrint(const string& text) {
+        whole_text = softWrap(text, win->_maxx-1);
         pos = 0;
         printPage(win->_maxy + 1);
     }
