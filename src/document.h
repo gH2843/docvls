@@ -15,9 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
+#pragma once //aml - simple ml for work with a presentations into a terminal.
 #ifndef P_AML_DOCUMENT_H
 #define P_AML_DOCUMENT_H
-#pragma once //aml - simple ml for work with a presentations into a terminal.
 
 #include <string>
 #include <fstream>

@@ -15,9 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
+#pragma once
 #ifndef P_AML_DOUBLY_LINKED_LIST_H
 #define P_AML_DOUBLY_LINKED_LIST_H
-#pragma once
 
 #include <utility>
 

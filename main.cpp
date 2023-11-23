@@ -19,6 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #include "src/document.h"
 #include "src/windows/page_window.h"
 #include "src/windows/turn_page_bar_win.h"
+#include "src/windows/top_bar_window.h"
+#include "src/plugins/plugin_manager.h"
 
 #define KEY_ENTER_ 10
 
@@ -50,10 +52,28 @@ int main(int argc, char* argv[]) {
 
     TurnPageBarWindow turnPageBarWin(x, y, doc.getPageCount());
     PageWindow pageWin(y, x, 0, doc.getText());
+    TopBarWindow topBarWin(y, x);
+
+    topBarWin.createTab(PLUGIN_MANAGER_KEY, "PluM", new PluginManager(&pageWin, &turnPageBarWin, &topBarWin));
 
     string sp_buff;
     while(true) {
-        switch (int c = getch()) {
+        int c = getch();
+
+        if (topBarWin.isTab(c)) {
+            pageWin.resize(y, x);
+            turnPageBarWin.resize(y, x, 0);
+            topBarWin.openTab(c);
+
+            getmaxyx(stdscr, y, x);
+            y -= 2; x -= 2;
+            clear(); refresh();
+            turnPageBarWin.resize(y, x, doc.getPageCount());
+            pageWin.resize(y, x, 0, doc.getText());
+            topBarWin.resize(y, x);
+        }
+
+        switch (c) {
             case 'Q':
             case 'q':
                 endwin();
@@ -70,7 +90,7 @@ int main(int argc, char* argv[]) {
                     pageWin.changeTextAndPrint(doc.getText());
                     turnPageBarWin.decPageNumber();
                     turnPageBarWin.printCurrentPageNumber();
-                }
+                } //todo: "/bin/less" faster than this, why? You need to optimise it
                 break;
             case KEY_RIGHT:
                 if (!doc.isNextPageNull()) {
@@ -80,7 +100,10 @@ int main(int argc, char* argv[]) {
                     turnPageBarWin.printCurrentPageNumber();
                 }
                 break;
-            case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+            case '0': case '1': case '2':
+            case '3': case '4': case '5':
+            case '6': case '7': case '8':
+            case '9':
                 turnPageBarWin.writeDigit(c);
                 break;
             case KEY_BACKSPACE:
@@ -102,6 +125,7 @@ int main(int argc, char* argv[]) {
                 clear(); refresh();
                 pageWin.resize(y, x, 0, doc.getText());
                 turnPageBarWin.resize(y, x, doc.getPageCount());
+                topBarWin.resize(y, x);
                 break;
             default:
                 break;

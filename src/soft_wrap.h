@@ -15,9 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
+#pragma once
 #ifndef P_AML_SOFT_WRAP_H
 #define P_AML_SOFT_WRAP_H
-#pragma once
 
 #include <string>
 
@@ -26,7 +26,7 @@ using namespace std;
 string softWrap(const string& page, short col) {
     int pos = 0, mod = 0;
     string buff;
-    --col;
+    --col; // todo: how to optimize it?
     for (; pos < page.size();) {
         int pose = pos + col;
         for (;; ++pos) {

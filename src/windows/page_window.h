@@ -15,9 +15,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
+#pragma once
 #ifndef P_AML_PAGE_WINDOW_H
 #define P_AML_PAGE_WINDOW_H
-#pragma once
 
 #include <string>
 #include "ncurses.h"
@@ -46,26 +46,27 @@ class PageWindow {
 
         wclear(win);
         mvwprintw(win, 1, 1, "%s", current_text.c_str());
-        box(win, 0, 0); //take out
+        box(win, 0, 0); //вынеси
         wrefresh(win);
     }
+
 public:
     PageWindow(short y, short x, int pos, const string& text) {
-        this->win = newwin(y - 1, x + 2, 0, 0);
+        this->win = newwin(y - 4, x + 2, 3, 0);
         this->pos = pos;
         this->whole_text = softWrap(text, x);
 
         printPage(win->_maxy + 1);
     }
     void resize(short y, short x, int pos_, const string& text) {
-        win = newwin(y - 1, x + 2, 0, 0);
+        win = newwin(y - 4, x + 2, 3, 0);
         this->pos = pos_;
         this->whole_text = softWrap(text, x);
 
         printPage(win->_maxy + 1);
     }
     void resize(short y, short x) {
-        win = newwin(y - 1, x + 2, 0, 0);
+        win = newwin(y - 4, x + 2, 3, 0);
 
         wclear(win);
         box(win, 0, 0); // take out
@@ -83,6 +84,19 @@ public:
         for (; pos < whole_text.size() && whole_text[pos] != '\n'; ++pos) { }
         pos += 2;
         printPage(win->_maxy + 1);
+    }
+
+    void mvprintWithAttr(short y, short x, const string& text, chtype attr) {
+        wattron(win, attr);
+        mvwprintw(win, y, x, "%s", text.c_str());
+        wattroff(win, attr);
+        wrefresh(win);
+    }
+    void mvprintWithAttr(short y, short x, const char& text, chtype attr) {
+        wattron(win, attr);
+        mvwprintw(win, y, x, "%c", text);
+        wattroff(win, attr);
+        wrefresh(win);
     }
 
     void changeTextAndPrint(const string& text) {

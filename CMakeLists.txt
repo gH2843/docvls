@@ -8,5 +8,8 @@ add_executable(docvls main.cpp
         src/document.h
         src/doubly_linked_list.h
         src/windows/page_window.h
-        src/windows/turn_page_bar_win.h)
+        src/windows/turn_page_bar_win.h
+        src/plugins/plugin_interface.h
+        src/windows/top_bar_window.h
+        src/plugins/plugin_manager.h)
 target_link_libraries(docvls "-lncursesw")
