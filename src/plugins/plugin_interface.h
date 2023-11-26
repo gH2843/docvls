@@ -27,13 +27,13 @@ class PluginInterface {
 protected:
     PageWindow* pageWin;
     TurnPageBarWindow* turnPageBarWin;
-    pair<WINDOW*, string> rawTopBarWin;
+    pair<WINDOW*, string> rawTopBarWin_with_content;
 public:
     PluginInterface(PageWindow* pageWin, TurnPageBarWindow* turnPageBarWin,
-                    WINDOW* rawTopBarWin) {
+                    WINDOW* rawTopBarWin_with_content) {
         this->pageWin = pageWin;
         this->turnPageBarWin = turnPageBarWin;
-        this->rawTopBarWin = pair(rawTopBarWin, "need to update on each call topTapLoop");
+        this->rawTopBarWin_with_content = pair(rawTopBarWin_with_content, "need to update on each call topTapLoop");
     }
 
     virtual void topTabLoop(const pair<vector<string>, int>& buffer_topBarWin) = 0;
@@ -41,20 +41,21 @@ public:
     void resize(const string& text_for_PageWin, const string& active_plugin, int active_plugin_pos) {
         short y, x;
         getmaxyx(stdscr, y, x);
-        clear(); refresh();
 
-        rawTopBarWin.first = newwin(3, x, 0, 0);
-        mvwprintw(rawTopBarWin.first, 1, 1, "%s", rawTopBarWin.second.c_str());
-        wattron(rawTopBarWin.first, WA_REVERSE);
-        mvwprintw(rawTopBarWin.first, 1, active_plugin_pos, "%s", active_plugin.c_str());
-        wattroff(rawTopBarWin.first, WA_REVERSE);
-        mvwprintw(rawTopBarWin.first, 1, active_plugin_pos + active_plugin.size()-3, "%s", "│");
-        box(rawTopBarWin.first, 0, 0);
-        wrefresh(rawTopBarWin.first);
+        WINDOW* rawTopBarWin = rawTopBarWin_with_content.first;
+        wresize(rawTopBarWin, 3, x);
+        werase(rawTopBarWin);
+        mvwprintw(rawTopBarWin, 1, 1, "%s", rawTopBarWin_with_content.second.c_str());
+        wattron(rawTopBarWin, WA_REVERSE);
+        mvwprintw(rawTopBarWin, 1, active_plugin_pos, "%s", active_plugin.c_str());
+        wattroff(rawTopBarWin, WA_REVERSE);
+        mvwprintw(rawTopBarWin, 1, active_plugin_pos + active_plugin.size()-3, "%s", "│");
+        box(rawTopBarWin, 0, 0);
+        wnoutrefresh(rawTopBarWin);
 
         turnPageBarWin->resize(y, x, 0);
-
         pageWin->resize(y, x, 0, text_for_PageWin);
+        doupdate();
     }
 
     virtual ~PluginInterface() = default;

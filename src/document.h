@@ -37,6 +37,7 @@ public:
     explicit Document(const string& doc_path) {
         std::ifstream doc (doc_path);
         string line, raw_doc;
+        raw_doc.reserve(4096);
         while (doc) {
             std::getline(doc, line);
             raw_doc += line + '\n';

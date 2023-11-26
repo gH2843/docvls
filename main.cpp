@@ -36,8 +36,8 @@ void checkSmallConsoleSize(short y, short x) {
 int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "");
 
-    initscr(); noecho(); raw();
-    keypad(stdscr, TRUE); curs_set(0); //DON'T FORGET TURN IT BACK, IF YOU NEED TO HIGHLIGHT CURSOR POSITION
+    initscr(); noecho();
+    raw(); curs_set(0);
     refresh(); //To display non-mutable char into the screen, which print before getch()
     short y, x; getmaxyx(stdscr, y, x);
     checkSmallConsoleSize(y, x);
@@ -54,21 +54,27 @@ int main(int argc, char* argv[]) {
     TopBarWindow topBarWin(x);
 
     topBarWin.createTab(PLUGIN_MANAGER_KEY, "PluM", new PluginManager(&pageWin, &turnPageBarWin, &topBarWin));
+    topBarWin.refresh();
 
     string sp_buff;
+    WINDOW* rawTopBarWin = topBarWin.getWin();
+    keypad(rawTopBarWin, TRUE);
     while(true) {
-        int c = getch();
-
+        int c = wgetch(rawTopBarWin); //maybe use subwin with getch() instead of newwin
         if (topBarWin.isTab(c)) {
             pageWin.resize(y, x);
             turnPageBarWin.resize(y, x, 0);
+            topBarWin.printTabsWithSelectOne(c);
+            topBarWin.noutrefresh();
+            doupdate();
             topBarWin.openTab(c);
 
             getmaxyx(stdscr, y, x);
-            clear(); refresh();
             turnPageBarWin.resize(y, x, doc.getPageCount());
             pageWin.resize(y, x, 0, doc.getText());
             topBarWin.resize(x);
+
+            doupdate();
         }
 
         switch (c) {
@@ -77,7 +83,7 @@ int main(int argc, char* argv[]) {
                 endwin();
                 return 0;
             case KEY_UP:
-                pageWin.scrollUp();
+                pageWin.scrollUp(); //does ncurses provides a scroll function?
                 break;
             case KEY_DOWN:
                 pageWin.scrollBack();
@@ -88,7 +94,8 @@ int main(int argc, char* argv[]) {
                     pageWin.changeTextAndPrint(doc.getText());
                     turnPageBarWin.decPageNumber();
                     turnPageBarWin.printCurrentPageNumber();
-                } //todo: "/bin/less" faster than this, why? You need to optimise it
+                    doupdate();
+                }
                 break;
             case KEY_RIGHT:
                 if (!doc.isNextPageNull()) {
@@ -96,6 +103,7 @@ int main(int argc, char* argv[]) {
                     pageWin.changeTextAndPrint(doc.getText());
                     turnPageBarWin.incPageNumber();
                     turnPageBarWin.printCurrentPageNumber();
+                    doupdate();
                 }
                 break;
             case '0': case '1': case '2':
@@ -114,15 +122,18 @@ int main(int argc, char* argv[]) {
                     pageWin.changeTextAndPrint(doc.getText());
                     turnPageBarWin.updateCurrentPageNumber();
                     turnPageBarWin.printCurrentPageNumber();
+                    doupdate();
                 }
                 break;
             case KEY_RESIZE:
                 getmaxyx(stdscr, y, x);
                 checkSmallConsoleSize(y, x);
-                clear(); refresh();
+                wrefresh(rawTopBarWin);
                 pageWin.resize(y, x, 0, doc.getText());
                 turnPageBarWin.resize(y, x, doc.getPageCount());
                 topBarWin.resize(x);
+
+                doupdate();
                 break;
             default:
                 break;

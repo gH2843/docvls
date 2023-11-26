@@ -62,7 +62,7 @@ public:
     }
     ~DoublyLinkedList() {
         clear();
-    } //todo: Check how the destructor works. Maybe there is memory leak!
+    }
 
     void pushBack(const Page& data) {
         if (head == nullptr) {

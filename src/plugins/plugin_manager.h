@@ -50,8 +50,11 @@ public:
     }
 
     void topTabLoop(const pair<vector<string>, int>& buffer_topBarWin) override {
-        rawTopBarWin.second = buffer_topBarWin.first[1];
+        rawTopBarWin_with_content.second = buffer_topBarWin.first[1];
         vector<string> plugins;
+
+        topBarWin->printTabsWithSelectOne(PLUGIN_MANAGER_KEY);
+        topBarWin->refresh();
 
         short pos = 1;
         for(auto const& file: fs::directory_iterator(path_to_plugins)) {
@@ -64,11 +67,14 @@ public:
             pageWin->mvprintWithAttr(pos, 1, plugins[pos-1], WA_NORMAL);
             ++pos;
         }
-
         pos = 0; // "select" first plugin
         pageWin->mvprintWithAttr(1, 1, plugins[0], WA_REVERSE);
+        pageWin->refresh();
+
+        WINDOW* rawTopBarWin = rawTopBarWin_with_content.first;
+        keypad(rawTopBarWin, TRUE);
         while (true) {
-            switch (getch()) {
+            switch (wgetch(rawTopBarWin)) {
                 case KEY_RESIZE: {
                     string buff, active_plugin;
                     short y = 0, active_plugin_y = 0;
@@ -82,8 +88,11 @@ public:
                     }
 
                     resize(buff, buffer_topBarWin.first[0], buffer_topBarWin.second);
-                    topBarWin->selectTab(PLUGIN_MANAGER_KEY);
+                    topBarWin->printTabsWithSelectOne(PLUGIN_MANAGER_KEY);
+                    topBarWin->noutrefresh();
                     pageWin->mvprintWithAttr(active_plugin_y, 1, active_plugin, WA_REVERSE);
+                    pageWin->noutrefresh();
+                    doupdate();
                     break;
                 }
                 case 'q':
@@ -93,6 +102,7 @@ public:
                         pageWin->mvprintWithAttr(pos+1, 1, plugins[pos], WA_NORMAL);
                         ++pos;
                         pageWin->mvprintWithAttr(pos+1, 1, plugins[pos], WA_REVERSE);
+                        pageWin->refresh();
                     }
                     break;
                 case KEY_UP:
@@ -100,6 +110,7 @@ public:
                         pageWin->mvprintWithAttr(pos+1, 1, plugins[pos], WA_NORMAL);
                         --pos;
                         pageWin->mvprintWithAttr(pos+1, 1, plugins[pos], WA_REVERSE);
+                        pageWin->refresh();
                     }
                     break;
                 case KEY_ENTER_: // if "<plugin_name> [ ]" not contains '*' - plugin not loaded.
@@ -107,6 +118,7 @@ public:
                         active_plugins.emplace(plugins[pos]);
                         plugins[pos][plugins[pos].size()-2] = '*';
                         pageWin->mvprintWithAttr(pos+1, 1, plugins[pos], WA_REVERSE);
+                        pageWin->refresh();
 
                         string path = path_to_plugins.string()+"/"+plugins[pos].substr(0, plugins[pos].length()-4);
                         void* library = dlopen(path.c_str(), RTLD_NOW);
@@ -121,6 +133,8 @@ public:
                                 dynamicLibraries[plugins[pos]].first = key;
 
                                 topBarWin->createTab(key, plugins[pos].substr(0, plugins[pos].length()-4), pPlugin);
+                                topBarWin->printTabsWithSelectOne(PLUGIN_MANAGER_KEY);
+                                topBarWin->refresh();
                             } else {
                                 dlclose(library);
                             }
@@ -136,6 +150,9 @@ public:
                         plugins[pos][plugins[pos].size()-2] = ' ';
                         active_plugins.erase(plugins[pos]);
                         pageWin->mvprintWithAttr(pos+1, 1, plugins[pos], WA_REVERSE);
+                        pageWin->noutrefresh();
+
+                        doupdate();
                     }
                     break;
             }

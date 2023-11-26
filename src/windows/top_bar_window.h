@@ -25,8 +25,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #include "ncurses.h"
 #include "../plugins/plugin_interface.h"
 
-#define PLUGIN_MANAGER_KEY_COPY KEY_F(1)
-
 using namespace std;
 
 class TopBarWindow{
@@ -59,26 +57,44 @@ public:
         wrefresh(win);
     }
     ~TopBarWindow() {
+        delwin(win);
         for (auto& plugin : plugins) {
             delete plugin.second;
         }
     }
+
     void resize(short x) {
-        this->win = newwin(3, x, 0, 0);
-        selectTab(KEY_F(1));
-        box(win, 0, 0);
+        wresize(win, 3, x);
+        printTabs();
+        wnoutrefresh(win);
+    }
+
+    void refresh() {
         wrefresh(win);
+    }
+
+    void noutrefresh() {
+        wnoutrefresh(win);
     }
 
     void createTab(const int& key, const string& name, PluginInterface* plugin) {
         plugins.emplace(key, plugin);
         tabs.emplace(key, name);
-
-        selectTab(PLUGIN_MANAGER_KEY_COPY);
+        printTabs();
     }
 
-    void selectTab(const int& key) {
-        wclear(win);
+    void printTabs() {
+        werase(win);
+        short pos = 1;
+        for (const auto& tab : tabs) {
+            mvwprintw(win, 1, pos, "%s", (tab.second + "│").c_str());
+            pos += tab.second.size() + 1;
+        }
+        box(win, 0, 0);
+    }
+
+    void printTabsWithSelectOne(const int& key) {
+        werase(win);
         short pos = 1;
         for (const auto& tab : tabs) {
             if (tab.first == key) {
@@ -92,11 +108,9 @@ public:
             pos += tab.second.size() + 1;
         }
         box(win, 0, 0);
-        wrefresh(win);
     }
 
     void openTab(const int& key) {
-        selectTab(key);
         plugins[key]->topTabLoop(getPluginsAsString(key));
     }
     bool isTab(const int& key) {
@@ -107,7 +121,8 @@ public:
         delete plugins[key];
         plugins.erase(key);
         tabs.erase(key);
-        selectTab(key);
+        printTabsWithSelectOne(key);
+        wnoutrefresh(win);
     }
 
     WINDOW* getWin() {

@@ -29,80 +29,79 @@ class PageWindow {
     WINDOW* win;
     int pos;
     string whole_text;
-    string current_text;
-
-    void printPage(short y) {
-        int n_count = 0, i = pos;
-        current_text.clear();
-        for (; i < whole_text.size() && n_count != y; ++i) {
-            if (whole_text[i] == '\n') {
-                ++n_count;
-            }
-            current_text += whole_text[i];
-        }
-        if (current_text[current_text.size()-1] == '\n') {
-            current_text.pop_back();
-        }
-
-        wclear(win);
-        mvwprintw(win, 1, 1, "%s", current_text.c_str());
-        box(win, 0, 0); //вынеси
-        wrefresh(win);
+    
+    void printPage(short y, short x) {
+        mvwprintw(win, 1, 0, "%s", whole_text.substr(pos * (x + 1) , y * (x + 1)).c_str());
+        box(win, 0, 0);
     }
-
 public:
     PageWindow(short y, short x, int pos, const string& text) {
         this->win = newwin(y - 6, x, 3, 0);
         this->pos = pos;
         this->whole_text = softWrap(text, x - 2);
 
-        printPage(win->_maxy + 1);
+        printPage(win->_maxy, win->_maxx);
+        wrefresh(win);
+    }
+    ~PageWindow() {
+        delwin(win);
     }
     void resize(short y, short x, int pos_, const string& text) {
-        win = newwin(y - 6, x, 3, 0);
+        wresize(win, y - 6, x);
+        werase(win);
         this->pos = pos_;
         this->whole_text = softWrap(text, x - 2);
 
-        printPage(win->_maxy + 1);
+        printPage(win->_maxy, win->_maxx);
+        wnoutrefresh(win);
     }
     void resize(short y, short x) {
-        win = newwin(y - 6, x, 3, 0);
+        wresize(win, y - 6, x);
+        werase(win);
+        box(win, 0, 0);
+        wnoutrefresh(win);
+    }
 
-        wclear(win);
-        box(win, 0, 0); // take out
+    void refresh() {
         wrefresh(win);
     }
+
+    void noutrefresh() {
+        wnoutrefresh(win);
+    }
+
     void scrollUp() {
-        if (pos > 0) {
-            pos -= 3;
-            for (; pos > 0 && whole_text[pos] != '\n'; --pos) {}
-            if(pos > 0) { pos += 2; }
-            printPage(win->_maxy + 1);
+        if (pos != 0) {
+            --pos;
+            printPage(win->_maxy, win->_maxx);
+            wrefresh(win);
         }
     }
-    void scrollBack() { //todo: add protection against scroll so far
-        for (; pos < whole_text.size() && whole_text[pos] != '\n'; ++pos) { }
-        pos += 2;
-        printPage(win->_maxy + 1);
+    void scrollBack() {
+        if (whole_text.size() / (win->_maxx) > pos + win->_maxy-1) {
+            ++pos;
+            printPage(win->_maxy, win->_maxx);
+            wrefresh(win);
+        }
     }
 
     void mvprintWithAttr(short y, short x, const string& text, chtype attr) {
         wattron(win, attr);
         mvwprintw(win, y, x, "%s", text.c_str());
         wattroff(win, attr);
-        wrefresh(win);
     }
     void mvprintWithAttr(short y, short x, const char& text, chtype attr) {
         wattron(win, attr);
         mvwprintw(win, y, x, "%c", text);
         wattroff(win, attr);
-        wrefresh(win);
     }
 
     void changeTextAndPrint(const string& text) {
-        whole_text = softWrap(text, win->_maxx - 2);
+        whole_text = softWrap(text, win->_maxx-1);
         pos = 0;
-        printPage(win->_maxy + 1);
+        werase(win);
+        printPage(win->_maxy, win->_maxx);
+        wnoutrefresh(win);
     }
 };
 

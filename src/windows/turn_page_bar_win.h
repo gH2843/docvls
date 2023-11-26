@@ -31,7 +31,6 @@ class TurnPageBarWindow {
     void printSPBuffer() {
         mvwprintw(win, 1, 10, "  ");
         mvwprintw(win, 1, 10, "%s", sp_buff.c_str());
-        wrefresh(win);
     }
 public:
     void printCurrentPageNumber() {
@@ -39,7 +38,7 @@ public:
         if (c_page < 10) {
             wprintw(win, "%s", ("0" + to_string(c_page)).c_str());
         } else { wprintw(win, "%d", c_page); }
-        wrefresh(win);
+        wnoutrefresh(win);
     }
     TurnPageBarWindow(short x, short y, short pages_count) {
         this->win = newwin(3, x, y - 3, 0);
@@ -53,7 +52,12 @@ public:
         mvwprintw(win, 2, 13, "┴");
         wrefresh(win);
     }
+    ~TurnPageBarWindow() {
+        delwin(win);
+    }
+
     void resize(short y, short x, short pages_count) {
+        delwin(win);
         win = newwin(3, x, y - 3, 0);
         mvwprintw(win, 1, 1, "%s", ("<  >  " + to_string(pages_count) + "│[  ]│").c_str());
         printCurrentPageNumber();
@@ -63,6 +67,11 @@ public:
         mvwprintw(win, 2, 8, "┴");
         mvwprintw(win, 0, 13, "┬");
         mvwprintw(win, 2, 13, "┴");
+
+        wnoutrefresh(win);
+    }
+
+    void refresh() {
         wrefresh(win);
     }
 
@@ -77,12 +86,14 @@ public:
         if (sp_buff.size() < 2) {
             sp_buff += (char) c;
             printSPBuffer();
+            this->refresh();
         }
     }
     void eraseOneDigit() {
         if (!sp_buff.empty()) {
             sp_buff.pop_back();
             printSPBuffer();
+            this->refresh();
         }
     }
     void updateCurrentPageNumber() {

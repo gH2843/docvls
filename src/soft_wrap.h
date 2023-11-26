@@ -23,20 +23,24 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
 using namespace std;
 
-string softWrap(const string& page, short col) {
+string softWrap(const string& page, short x) {
     int pos = 0, mod = 0;
-    string buff;
-    --col; // todo: how to optimize it?
-    for (; pos < page.size();) {
-        int pose = pos + col;
+    string buff; buff.reserve(4096);
+    --x;
+    buff.append("*");
+    while (pos < page.size()) {
+        int pose = pos + x;
         for (;; ++pos) {
             buff += page[pos];
             if (page[pos] == '\n') {
-                buff += "*";
+                buff.pop_back();
+                buff.append(pose - pos - mod + 1, ' ');
+                buff += "\n*";
                 mod = 0;
                 ++pos;
                 break;
-            } else if (pos == pose - mod) {
+            }
+            else if (pos == pose - mod) {
                 if (isalpha(page[pos+1]) && isalpha(page[pos])) {
                     buff += "\n*-";
                     mod = 1;

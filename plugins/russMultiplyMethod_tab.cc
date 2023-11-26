@@ -18,9 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #include <string>
 #include <vector>
 #include "../src/plugins/plugin_interface.h"
+
 #define PLUGIN_KEY KEY_F(2)
 #define KEY_ENTER_ 10
-#define OFFSET 2
 
 using namespace std;
 
@@ -32,7 +32,7 @@ public:
             PluginInterface(pageWin, turnPageBarWin, rawTopBarWin) { is_star = false; }
 
     void topTabLoop(const pair<vector<string>, int>& buffer_topBarWin) override {
-        rawTopBarWin.second = buffer_topBarWin.first[1];
+        rawTopBarWin_with_content.second = buffer_topBarWin.first[1];
         char ch;
 
         if (!expression.empty()) {
@@ -41,9 +41,12 @@ public:
         if (!buffer.empty()) {
             pageWin->changeTextAndPrint(expression + "\n\n" + buffer);
         }
+        doupdate();
 
+        WINDOW* rawTopBarWin = rawTopBarWin_with_content.first;
+        keypad(rawTopBarWin, TRUE);
         while (true) {
-            switch (int c = getch()) {
+            switch (int c = wgetch(rawTopBarWin)) {
                 case KEY_RESIZE: {
                     resize(expression + "\n\n" + buffer, buffer_topBarWin.first[0], buffer_topBarWin.second);
                     break;
@@ -57,11 +60,13 @@ public:
                     ch = c;
                     expression.push_back(ch);
                     pageWin->mvprintWithAttr(1, expression.size(), ch, WA_NORMAL);
+                    pageWin->refresh();
                     break;
                 case '*':
                     if (!is_star && !expression.empty()) {
                         expression.push_back('*');
                         pageWin->mvprintWithAttr(1, expression.size(), '*', WA_NORMAL);
+                        pageWin->refresh();
                         is_star = true;
                     }
                     break;
@@ -71,6 +76,7 @@ public:
                             is_star = false;
                         }
                         pageWin->mvprintWithAttr(1, expression.size(), ' ', WA_NORMAL);
+                        pageWin->refresh();
                         expression.pop_back();
                     }
                     break;
@@ -90,7 +96,6 @@ public:
                         int b = stoi(operands[1]);
 
                         buffer.clear();
-                        //pos = 1;
                         if (a & 1) {
                             vector<int> summands;
                             while (a > 1) {
@@ -118,6 +123,7 @@ public:
                             buffer += to_string(a) + " * " + to_string(b) + " = " + to_string(b);
                         }
                         pageWin->changeTextAndPrint(expression + "\n\n" + buffer);
+                        doupdate();
                     }
                     break;
                 }
