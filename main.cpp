@@ -41,7 +41,6 @@ int main(int argc, char* argv[]) {
     refresh(); //To display non-mutable char into the screen, which print before getch()
     short y, x; getmaxyx(stdscr, y, x);
     checkSmallConsoleSize(y, x);
-    y -= 2; x -= 2;
 
     if (!is_regular_file(filesystem::path(argv[1]))) {
         string buff = argv[1]; buff += " isn't correct file, please put .aml file on next run";
@@ -52,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     TurnPageBarWindow turnPageBarWin(x, y, doc.getPageCount());
     PageWindow pageWin(y, x, 0, doc.getText());
-    TopBarWindow topBarWin(y, x);
+    TopBarWindow topBarWin(x);
 
     topBarWin.createTab(PLUGIN_MANAGER_KEY, "PluM", new PluginManager(&pageWin, &turnPageBarWin, &topBarWin));
 
@@ -66,11 +65,10 @@ int main(int argc, char* argv[]) {
             topBarWin.openTab(c);
 
             getmaxyx(stdscr, y, x);
-            y -= 2; x -= 2;
             clear(); refresh();
             turnPageBarWin.resize(y, x, doc.getPageCount());
             pageWin.resize(y, x, 0, doc.getText());
-            topBarWin.resize(y, x);
+            topBarWin.resize(x);
         }
 
         switch (c) {
@@ -121,11 +119,10 @@ int main(int argc, char* argv[]) {
             case KEY_RESIZE:
                 getmaxyx(stdscr, y, x);
                 checkSmallConsoleSize(y, x);
-                y -= 2; x -= 2;
                 clear(); refresh();
                 pageWin.resize(y, x, 0, doc.getText());
                 turnPageBarWin.resize(y, x, doc.getPageCount());
-                topBarWin.resize(y, x);
+                topBarWin.resize(x);
                 break;
             default:
                 break;

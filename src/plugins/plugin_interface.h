@@ -41,10 +41,9 @@ public:
     void resize(const string& text_for_PageWin, const string& active_plugin, int active_plugin_pos) {
         short y, x;
         getmaxyx(stdscr, y, x);
-        y -= 2; x -= 2;
         clear(); refresh();
 
-        rawTopBarWin.first = newwin(3, x + 2, 0, 0);
+        rawTopBarWin.first = newwin(3, x, 0, 0);
         mvwprintw(rawTopBarWin.first, 1, 1, "%s", rawTopBarWin.second.c_str());
         wattron(rawTopBarWin.first, WA_REVERSE);
         mvwprintw(rawTopBarWin.first, 1, active_plugin_pos, "%s", active_plugin.c_str());

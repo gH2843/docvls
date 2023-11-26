@@ -42,7 +42,7 @@ public:
         wrefresh(win);
     }
     TurnPageBarWindow(short x, short y, short pages_count) {
-        this->win = newwin(3, x + 2, y - 1, 0);
+        this->win = newwin(3, x, y - 3, 0);
         this->c_page = 1;
         mvwprintw(win, 1, 1, "%s", ("<  >  " + to_string(pages_count) + "│[  ]│").c_str());
         printCurrentPageNumber();
@@ -54,7 +54,7 @@ public:
         wrefresh(win);
     }
     void resize(short y, short x, short pages_count) {
-        win = newwin(3, x + 2, y - 1, 0);
+        win = newwin(3, x, y - 3, 0);
         mvwprintw(win, 1, 1, "%s", ("<  >  " + to_string(pages_count) + "│[  ]│").c_str());
         printCurrentPageNumber();
         printSPBuffer();

@@ -52,8 +52,8 @@ class TopBarWindow{
         return pair(plugins_string, active_plugin_pos);
     }
 public:
-    TopBarWindow(short y, short x) {
-        this->win = newwin(3, x + 2, 0, 0);
+    TopBarWindow(short x) {
+        this->win = newwin(3, x, 0, 0);
 
         box(win, 0, 0);
         wrefresh(win);
@@ -63,8 +63,8 @@ public:
             delete plugin.second;
         }
     }
-    void resize(short y, short x) {
-        this->win = newwin(3, x + 2, 0, 0);
+    void resize(short x) {
+        this->win = newwin(3, x, 0, 0);
         selectTab(KEY_F(1));
         box(win, 0, 0);
         wrefresh(win);

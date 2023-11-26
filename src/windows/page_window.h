@@ -52,21 +52,21 @@ class PageWindow {
 
 public:
     PageWindow(short y, short x, int pos, const string& text) {
-        this->win = newwin(y - 4, x + 2, 3, 0);
+        this->win = newwin(y - 6, x, 3, 0);
         this->pos = pos;
-        this->whole_text = softWrap(text, x);
+        this->whole_text = softWrap(text, x - 2);
 
         printPage(win->_maxy + 1);
     }
     void resize(short y, short x, int pos_, const string& text) {
-        win = newwin(y - 4, x + 2, 3, 0);
+        win = newwin(y - 6, x, 3, 0);
         this->pos = pos_;
-        this->whole_text = softWrap(text, x);
+        this->whole_text = softWrap(text, x - 2);
 
         printPage(win->_maxy + 1);
     }
     void resize(short y, short x) {
-        win = newwin(y - 4, x + 2, 3, 0);
+        win = newwin(y - 6, x, 3, 0);
 
         wclear(win);
         box(win, 0, 0); // take out
@@ -100,7 +100,7 @@ public:
     }
 
     void changeTextAndPrint(const string& text) {
-        whole_text = softWrap(text, win->_maxx-1);
+        whole_text = softWrap(text, win->_maxx - 2);
         pos = 0;
         printPage(win->_maxy + 1);
     }
