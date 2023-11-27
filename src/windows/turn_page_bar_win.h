@@ -25,26 +25,25 @@ using namespace std;
 
 class TurnPageBarWindow {
     WINDOW* win;
-    short c_page; //current page
+    short c_page_num; //current page number
     string sp_buff; //buffer for "select page" button;
+
+    void printPageNum() {
+        if (c_page_num < 10) {
+            mvwprintw(win, 1, 2, "%s", ("0" + to_string(c_page_num)).c_str());
+        } else { mvwprintw(win, 1, 2, "%d", c_page_num); }
+    }
 
     void printSPBuffer() {
         mvwprintw(win, 1, 10, "  ");
         mvwprintw(win, 1, 10, "%s", sp_buff.c_str());
     }
 public:
-    void printCurrentPageNumber() {
-        wmove(win, 1, 2);
-        if (c_page < 10) {
-            wprintw(win, "%s", ("0" + to_string(c_page)).c_str());
-        } else { wprintw(win, "%d", c_page); }
-        wnoutrefresh(win);
-    }
     TurnPageBarWindow(short x, short y, short pages_count) {
         this->win = newwin(3, x, y - 3, 0);
-        this->c_page = 1;
+        this->c_page_num = 1;
         mvwprintw(win, 1, 1, "%s", ("<  >  " + to_string(pages_count) + "│[  ]│").c_str());
-        printCurrentPageNumber();
+        printPageNum();
         box(win, 0, 0);
         mvwprintw(win, 0, 8, "┬");
         mvwprintw(win, 2, 8, "┴");
@@ -60,46 +59,53 @@ public:
         delwin(win);
         win = newwin(3, x, y - 3, 0);
         mvwprintw(win, 1, 1, "%s", ("<  >  " + to_string(pages_count) + "│[  ]│").c_str());
-        printCurrentPageNumber();
+        printPageNum();
         printSPBuffer();
         box(win, 0, 0);
         mvwprintw(win, 0, 8, "┬");
         mvwprintw(win, 2, 8, "┴");
         mvwprintw(win, 0, 13, "┬");
         mvwprintw(win, 2, 13, "┴");
-
         wnoutrefresh(win);
     }
 
-    void refresh() {
-        wrefresh(win);
+    //"_NORF" mean nououtrefresh()
+    void incPageNum_NORF() {
+        ++c_page_num;
+        printPageNum();
+        wnoutrefresh(win);
+    }
+    //"_NORF" mean nououtrefresh()
+    void decPageNum_NORF() {
+        --c_page_num;
+        printPageNum();
+        wnoutrefresh(win);
     }
 
-    void incPageNumber() {
-        ++c_page;
-    }
-    void decPageNumber() {
-        --c_page;
+    //"_NORF" mean nououtrefresh()
+    void updatePageNumWithPageNumToGo_NORF() {
+        c_page_num = static_cast<short>(stoi(sp_buff));
+        printPageNum();
+        wnoutrefresh(win);
     }
 
-    void writeDigit(int c) {
+    //"_RF" mean refresh
+    void writeDigitToPageNumToGo_RF(int c) {
         if (sp_buff.size() < 2) {
             sp_buff += (char) c;
             printSPBuffer();
-            this->refresh();
+            wrefresh(win);
         }
     }
-    void eraseOneDigit() {
+    //"RF"mean refresh
+    void eraseDigitFromPageNumToGo_RF() {
         if (!sp_buff.empty()) {
             sp_buff.pop_back();
             printSPBuffer();
-            this->refresh();
+            wrefresh(win);
         }
     }
-    void updateCurrentPageNumber() {
-        c_page = static_cast<short>(stoi(sp_buff));
-    }
-    short getPageNum() {
+    short getPageNumToGo() {
         return static_cast<short>(stoi(sp_buff));
     }
 };

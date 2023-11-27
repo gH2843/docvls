@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
-#include <string>
 #include <vector>
 #include "../src/plugins/plugin_interface.h"
 
@@ -36,10 +35,10 @@ public:
         char ch;
 
         if (!expression.empty()) {
-            pageWin->changeTextAndPrint(expression);
+            pageWin->changeText_NORF(expression);
         }
         if (!buffer.empty()) {
-            pageWin->changeTextAndPrint(expression + "\n\n" + buffer);
+            pageWin->changeText_NORF(expression + "\n\n" + buffer);
         }
         doupdate();
 
@@ -47,10 +46,7 @@ public:
         keypad(rawTopBarWin, TRUE);
         while (true) {
             switch (int c = wgetch(rawTopBarWin)) {
-                case KEY_RESIZE: {
-                    resize(expression + "\n\n" + buffer, buffer_topBarWin.first[0], buffer_topBarWin.second);
-                    break;
-                }
+                case 'Q':
                 case 'q':
                     goto freedom;
                 case '0': case '1': case '2':
@@ -122,9 +118,13 @@ public:
                             }
                             buffer += to_string(a) + " * " + to_string(b) + " = " + to_string(b);
                         }
-                        pageWin->changeTextAndPrint(expression + "\n\n" + buffer);
+                        pageWin->changeText_NORF(expression + "\n\n" + buffer);
                         doupdate();
                     }
+                    break;
+                }
+                case KEY_RESIZE: {
+                    resize(expression + "\n\n" + buffer, buffer_topBarWin.first[0], buffer_topBarWin.second);
                     break;
                 }
                 default:

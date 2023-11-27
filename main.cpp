@@ -56,7 +56,6 @@ int main(int argc, char* argv[]) {
     topBarWin.createTab(PLUGIN_MANAGER_KEY, "PluM", new PluginManager(&pageWin, &turnPageBarWin, &topBarWin));
     topBarWin.refresh();
 
-    string sp_buff;
     WINDOW* rawTopBarWin = topBarWin.getWin();
     keypad(rawTopBarWin, TRUE);
     while(true) {
@@ -73,7 +72,6 @@ int main(int argc, char* argv[]) {
             turnPageBarWin.resize(y, x, doc.getPageCount());
             pageWin.resize(y, x, 0, doc.getText());
             topBarWin.resize(x);
-
             doupdate();
         }
 
@@ -83,26 +81,24 @@ int main(int argc, char* argv[]) {
                 endwin();
                 return 0;
             case KEY_UP:
-                pageWin.scrollUp(); //does ncurses provides a scroll function?
+                pageWin.scrollUp_RF(); //does ncurses provides a scroll function?
                 break;
             case KEY_DOWN:
-                pageWin.scrollBack();
+                pageWin.scrollBack_RF();
                 break;
             case KEY_LEFT:
                 if (!doc.isPrevPageNull()) {
                     doc.gotoPrevPage();
-                    pageWin.changeTextAndPrint(doc.getText());
-                    turnPageBarWin.decPageNumber();
-                    turnPageBarWin.printCurrentPageNumber();
+                    pageWin.changeText_NORF(doc.getText());
+                    turnPageBarWin.decPageNum_NORF();
                     doupdate();
                 }
                 break;
             case KEY_RIGHT:
                 if (!doc.isNextPageNull()) {
                     doc.gotoNextPage();
-                    pageWin.changeTextAndPrint(doc.getText());
-                    turnPageBarWin.incPageNumber();
-                    turnPageBarWin.printCurrentPageNumber();
+                    pageWin.changeText_NORF(doc.getText());
+                    turnPageBarWin.incPageNum_NORF();
                     doupdate();
                 }
                 break;
@@ -110,18 +106,17 @@ int main(int argc, char* argv[]) {
             case '3': case '4': case '5':
             case '6': case '7': case '8':
             case '9':
-                turnPageBarWin.writeDigit(c);
+                turnPageBarWin.writeDigitToPageNumToGo_RF(c);
                 break;
             case KEY_BACKSPACE:
-                turnPageBarWin.eraseOneDigit();
+                turnPageBarWin.eraseDigitFromPageNumToGo_RF();
                 break;
             case KEY_ENTER_:
-                if (doc.getPageCount() >= turnPageBarWin.getPageNum()
-                && turnPageBarWin.getPageNum() != 0) {
-                    doc.gotoPage(turnPageBarWin.getPageNum()-1);
-                    pageWin.changeTextAndPrint(doc.getText());
-                    turnPageBarWin.updateCurrentPageNumber();
-                    turnPageBarWin.printCurrentPageNumber();
+                if (doc.getPageCount() >= turnPageBarWin.getPageNumToGo()
+                && turnPageBarWin.getPageNumToGo() != 0) {
+                    doc.gotoPage(turnPageBarWin.getPageNumToGo() - 1);
+                    pageWin.changeText_NORF(doc.getText());
+                    turnPageBarWin.updatePageNumWithPageNumToGo_NORF();
                     doupdate();
                 }
                 break;
@@ -132,7 +127,6 @@ int main(int argc, char* argv[]) {
                 pageWin.resize(y, x, 0, doc.getText());
                 turnPageBarWin.resize(y, x, doc.getPageCount());
                 topBarWin.resize(x);
-
                 doupdate();
                 break;
             default:

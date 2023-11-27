@@ -142,7 +142,7 @@ public:
                             exit(1); // todo: print error message
                         }
                     } else {
-                        topBarWin->deleteTab(dynamicLibraries[plugins[pos]].first);
+                        topBarWin->deleteTab_NORF(dynamicLibraries[plugins[pos]].first);
 
                         dlclose(dynamicLibraries[plugins[pos]].second);
                         dynamicLibraries.erase(plugins[pos]);

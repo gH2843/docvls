@@ -27,12 +27,13 @@ using namespace std;
 
 class Document {
     short page_count = 0;
+    DoublyLinkedList pages;
+    Node* page = pages.head;
+
     void addPage(string& text, string& name) {
         pages.pushBack(Page(text, name));
         ++page_count;
     }
-    DoublyLinkedList pages;
-    Node* page = pages.head;
 public:
     explicit Document(const string& doc_path) {
         std::ifstream doc (doc_path);
@@ -71,7 +72,6 @@ public:
     bool isNextPageNull() {
         return page->next == nullptr;
     }
-
 
     [[nodiscard]] short getPageCount() const {
         return page_count;

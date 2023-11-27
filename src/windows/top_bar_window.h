@@ -19,10 +19,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #ifndef DOCVLS_TOP_BAR_WINDOW_H
 #define DOCVLS_TOP_BAR_WINDOW_H
 
-#include <string>
 #include <vector>
 #include <unordered_map>
-#include "ncurses.h"
 #include "../plugins/plugin_interface.h"
 
 using namespace std;
@@ -52,7 +50,6 @@ class TopBarWindow{
 public:
     TopBarWindow(short x) {
         this->win = newwin(3, x, 0, 0);
-
         box(win, 0, 0);
         wrefresh(win);
     }
@@ -72,15 +69,8 @@ public:
     void refresh() {
         wrefresh(win);
     }
-
     void noutrefresh() {
         wnoutrefresh(win);
-    }
-
-    void createTab(const int& key, const string& name, PluginInterface* plugin) {
-        plugins.emplace(key, plugin);
-        tabs.emplace(key, name);
-        printTabs();
     }
 
     void printTabs() {
@@ -92,7 +82,6 @@ public:
         }
         box(win, 0, 0);
     }
-
     void printTabsWithSelectOne(const int& key) {
         werase(win);
         short pos = 1;
@@ -110,19 +99,24 @@ public:
         box(win, 0, 0);
     }
 
+    void createTab(const int& key, const string& name, PluginInterface* plugin) {
+        plugins.emplace(key, plugin);
+        tabs.emplace(key, name);
+        printTabs();
+    }
     void openTab(const int& key) {
         plugins[key]->topTabLoop(getPluginsAsString(key));
     }
-    bool isTab(const int& key) {
-        return plugins.find(key) != plugins.end();
-    }
-
-    void deleteTab(const int& key) {
+    //"_NORF" mean noutrefresh()
+    void deleteTab_NORF(const int& key) {
         delete plugins[key];
         plugins.erase(key);
         tabs.erase(key);
         printTabsWithSelectOne(key);
         wnoutrefresh(win);
+    }
+    bool isTab(const int& key) {
+        return plugins.find(key) != plugins.end();
     }
 
     WINDOW* getWin() {

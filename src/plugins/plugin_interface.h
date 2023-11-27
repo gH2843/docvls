@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #ifndef DOCVLS_PLUGIN_INTERFACE_H
 #define DOCVLS_PLUGIN_INTERFACE_H
 
-#include <ncurses.h>
 #include "../windows/page_window.h"
 #include "../windows/turn_page_bar_win.h"
 
@@ -30,10 +29,10 @@ protected:
     pair<WINDOW*, string> rawTopBarWin_with_content;
 public:
     PluginInterface(PageWindow* pageWin, TurnPageBarWindow* turnPageBarWin,
-                    WINDOW* rawTopBarWin_with_content) {
+                    WINDOW* rawTopBarWin) {
         this->pageWin = pageWin;
         this->turnPageBarWin = turnPageBarWin;
-        this->rawTopBarWin_with_content = pair(rawTopBarWin_with_content, "need to update on each call topTapLoop");
+        this->rawTopBarWin_with_content = pair(rawTopBarWin, "need to update on each call topTapLoop");
     }
 
     virtual void topTabLoop(const pair<vector<string>, int>& buffer_topBarWin) = 0;

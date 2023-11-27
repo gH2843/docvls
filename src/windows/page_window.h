@@ -19,7 +19,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 #ifndef P_AML_PAGE_WINDOW_H
 #define P_AML_PAGE_WINDOW_H
 
-#include <string>
 #include "ncurses.h"
 #include "../soft_wrap.h"
 
@@ -39,19 +38,18 @@ public:
         this->win = newwin(y - 6, x, 3, 0);
         this->pos = pos;
         this->whole_text = softWrap(text, x - 2);
-
         printPage(win->_maxy, win->_maxx);
         wrefresh(win);
     }
     ~PageWindow() {
         delwin(win);
     }
+
     void resize(short y, short x, int pos_, const string& text) {
         wresize(win, y - 6, x);
         werase(win);
         this->pos = pos_;
         this->whole_text = softWrap(text, x - 2);
-
         printPage(win->_maxy, win->_maxx);
         wnoutrefresh(win);
     }
@@ -65,19 +63,20 @@ public:
     void refresh() {
         wrefresh(win);
     }
-
     void noutrefresh() {
         wnoutrefresh(win);
     }
 
-    void scrollUp() {
+    //"_RF" mean refresh
+    void scrollUp_RF() {
         if (pos != 0) {
             --pos;
             printPage(win->_maxy, win->_maxx);
             wrefresh(win);
         }
     }
-    void scrollBack() {
+    //"_RF" mean refresh
+    void scrollBack_RF() {
         if (whole_text.size() / (win->_maxx) > pos + win->_maxy-1) {
             ++pos;
             printPage(win->_maxy, win->_maxx);
@@ -96,7 +95,8 @@ public:
         wattroff(win, attr);
     }
 
-    void changeTextAndPrint(const string& text) {
+    //"_NORF" mean nooutrefresh()
+    void changeText_NORF(const string& text) {
         whole_text = softWrap(text, win->_maxx-1);
         pos = 0;
         werase(win);
